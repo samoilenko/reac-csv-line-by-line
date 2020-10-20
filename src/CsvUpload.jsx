@@ -28,7 +28,7 @@ function reducer(state, action) {
         case 'uploaded':
             return { ...state, uploadedCount: state.uploadedCount + 1 };
         default:
-            throw new Error();
+            throw new Error(`Unknown '${action.type}' action type`);
     }
 }
 
@@ -47,16 +47,16 @@ const CsvUpload = ({ processData }) => {
         }
     }, [dispatch]);
 
-    const onAbort = () => dispatch({ type: 'done' });
+    const onAbort = useCallback(() => dispatch({ type: 'done' }), [dispatch]);
     const onSuccess = useCallback(() => {
         dispatch({ type: 'uploaded' }); 
         dispatch({ type: 'next' }); 
     }, [dispatch]);
 
-    const onFileSelect = text => {
+    const onFileSelect = useCallback(text => {
         const [, ...data] = text;
         dispatch({ type: 'new', data });
-    };
+    }, [dispatch]);
 
     const uploadLine = useCallback(() => {
         if (lineNumber === -1)
