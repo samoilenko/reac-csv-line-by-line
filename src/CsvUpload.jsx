@@ -22,7 +22,7 @@ function reducer(state, action) {
             const { data } = action;
             return { ...initState, linesData: data, lineNumber: 0 };
         case 'error':
-            return { ...state, errors: [...state.errors, { line: state.lineNumber, errorMessage: action.errorMessage }] };
+            return { ...state, errors: [...state.errors, { line: state.lineNumber + 1, errorMessage: action.errorMessage }] };
         case 'done':
             return { ...state, done: true };
         case 'uploaded':
@@ -37,21 +37,21 @@ const CsvUpload = ({ processData }) => {
 
     const { lineNumber, linesData, done, errors, uploadedCount } = state;
 
-    const onError = e => {
+    const onError = useCallback(e => {
         dispatch({ type: 'error', errorMessage: e.message });
 
-        if (window.confirm(`Error is occured. \n ${e.message} \n Continue?`)) {
+        if (window.confirm(`Error is occurred. \n ${e.message} \n Continue?`)) {
             dispatch({ type: 'next' })
         } else {
             dispatch({ type: 'done' });
         }
-    };
+    }, [dispatch]);
 
     const onAbort = () => dispatch({ type: 'done' });
-    const onSuccess = () => {
+    const onSuccess = useCallback(() => {
         dispatch({ type: 'uploaded' }); 
         dispatch({ type: 'next' }); 
-    };
+    }, [dispatch]);
 
     const onFileSelect = text => {
         const [, ...data] = text;
@@ -65,7 +65,7 @@ const CsvUpload = ({ processData }) => {
         processData(linesData[lineNumber])
             .then(onSuccess)
             .catch(onError);
-    }, [lineNumber, linesData, processData]);
+    }, [onSuccess, onError, lineNumber, linesData, processData]);
 
     useEffect(uploadLine, [uploadLine]);
 
